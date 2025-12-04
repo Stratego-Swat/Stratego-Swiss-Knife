@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Stratego Swiss Knife</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 24px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-text {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-info, .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            min-width: 130px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-family: inherit;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 
+                1px 1px 0 rgba(255, 255, 255, 0.04),
+                2px 2px 0 rgba(255, 255, 255, 0.02);
+        }
+        
+        .user-info:hover, .logout-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .user-avatar {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .logout-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Main Content */
+        .main {
+            padding: 80px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .welcome-section {
+            margin-bottom: 60px;
+        }
+        
+        .welcome-section h2 {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+        }
+        
+        .welcome-section p {
+            font-size: 14px;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Apps Grid */
+        .apps-section h3 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+        
+        .app-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 32px;
+            transition: all 0.2s;
+            box-shadow: 
+                1px 1px 0 rgba(255, 255, 255, 0.05),
+                2px 2px 0 rgba(255, 255, 255, 0.03),
+                3px 3px 0 rgba(255, 255, 255, 0.02),
+                4px 4px 0 rgba(255, 255, 255, 0.01);
+        }
+        
+        .app-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            flex-shrink: 0;
+            box-shadow: 
+                1px 1px 0 rgba(255, 255, 255, 0.04),
+                2px 2px 0 rgba(255, 255, 255, 0.02);
+        }
+        
+        .app-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+        }
+        
+        .app-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #10b981;
+        }
+        
+        .app-status.demo {
+            color: #f59e0b;
+        }
+        
+        .app-status .dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .app-status.demo .dot {
+            background: #f59e0b;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        .app-description {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+        
+        .app-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 
+                1px 1px 0 rgba(255, 255, 255, 0.05),
+                2px 2px 0 rgba(255, 255, 255, 0.03);
+        }
+        
+        .app-link:hover {
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .app-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-version {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+        
+        .app-version:hover {
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-text">Stratego Swiss Knife</span>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">{{ user[0].upper() }}</div>
+                <span class="user-name">{{ user }}</span>
+            </div>
+            <a href="/logout" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Esci
+            </a>
+        </div>
+    </header>
+    
+    <main class="main">
+        <section class="welcome-section">
+            <h2>Ciao, {{ user }}!</h2>
+            <p>Seleziona un'applicazione per iniziare</p>
+        </section>
+        
+        <section class="apps-section">
+            <h3>Le tue applicazioni</h3>
+            
+            <div class="apps-grid">
+                {% for app in apps %}
+                <div class="app-card">
+                    <div class="app-header">
+                        <div class="app-icon">
+                            <i class="{{ app.icon }}"></i>
+                        </div>
+                        <div class="app-info">
+                            <h4>{{ app.name }}</h4>
+                            <span class="app-status {% if app.status == 'demo' %}demo{% endif %}">
+                                <span class="dot"></span>
+                                {% if app.status == 'demo' %}Demo{% else %}Attivo{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <p class="app-description">{{ app.description }}</p>
+                    
+                    <div class="app-footer">
+                        <a href="{{ app.url }}" class="app-link">
+                            Apri App
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <span class="app-version" data-app-id="{{ app.id }}" onclick="editVersion(this)">{{ app.version }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        function editVersion(element) {
+            const password = prompt('Password per modificare la versione:');
+            if (!password) return;
+            
+            const newVersion = prompt('Nuova versione:', element.textContent);
+            if (!newVersion) return;
+            
+            const appId = element.dataset.appId;
+            
+            const formData = new FormData();
+            formData.append('app_id', appId);
+            formData.append('version', newVersion);
+            formData.append('password', password);
+            
+            fetch('/api/update-version', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.detail || 'Errore');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                element.textContent = data.version;
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        }
+    </script>
+</body>
+</html>

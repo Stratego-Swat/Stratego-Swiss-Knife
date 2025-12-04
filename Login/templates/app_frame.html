@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - Stratego Swiss Knife</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #0f1419;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --text: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-title i {
+            color: var(--accent);
+            font-size: 18px;
+        }
+        
+        .app-title span {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-dark);
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        
+        .user-badge i {
+            color: var(--accent);
+        }
+        
+        .app-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            background: var(--bg-dark);
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .loading i {
+            font-size: 48px;
+            color: var(--accent);
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Dashboard
+            </a>
+            <div class="app-title">
+                <i class="fas fa-search"></i>
+                <span>{{ app_name }}</span>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-badge">
+                <i class="fas fa-user"></i>
+                {{ user }}
+            </div>
+        </div>
+    </header>
+    
+    <iframe src="{{ app_url }}" class="app-frame" id="appFrame"></iframe>
+    
+    <script>
+        // Check if iframe loaded
+        const frame = document.getElementById('appFrame');
+        
+        frame.onload = function() {
+            console.log('App loaded successfully');
+        };
+        
+        frame.onerror = function() {
+            console.error('Error loading app');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Content Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #0f1419;
+            --bg-elevated: #1a1f26;
+            --border: rgba(255,255,255,0.08);
+            --text: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --text-muted: rgba(255,255,255,0.4);
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --accent-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--success);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Main Layout - Split View */
+        .main {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            height: calc(100vh - 69px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 28px;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+        
+        .step-badge {
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.05);
+        }
+        
+        .upload-zone.active {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 28px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        
+        .upload-zone.active .upload-icon {
+            color: var(--success);
+        }
+        
+        .upload-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .file-info {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            text-align: left;
+        }
+        
+        .upload-zone.active .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-info i {
+            color: var(--success);
+        }
+        
+        /* Keywords List */
+        .keywords-container {
+            max-height: 220px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+        }
+        
+        .keyword-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+        }
+        
+        .keyword-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .keyword-item:hover {
+            background: rgba(124, 58, 237, 0.1);
+        }
+        
+        .keyword-item.selected {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.15);
+        }
+        
+        .keyword-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        
+        .keyword-item.selected .keyword-checkbox {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .keyword-checkbox i {
+            font-size: 11px;
+            opacity: 0;
+        }
+        
+        .keyword-item.selected .keyword-checkbox i {
+            opacity: 1;
+        }
+        
+        .keyword-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .keyword-text {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .keyword-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        
+        .keyword-volume {
+            font-size: 12px;
+            color: var(--accent-light);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .select-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .select-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .select-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .serp-info {
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .serp-info i {
+            color: var(--accent);
+        }
+        
+        .selected-count {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Product Scraping Styles */
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+        
+        .scrape-section {
+            margin-bottom: 12px;
+        }
+        
+        .scrape-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .scrape-input-row .form-input {
+            flex: 1;
+        }
+        
+        .btn-scrape {
+            padding: 10px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn-scrape:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-scrape:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-scrape.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .scraped-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .scraped-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .scraped-title i {
+            color: var(--success);
+        }
+        
+        .cms-badge {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--accent-light);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .products-select-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .products-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .product-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        
+        .product-checkbox:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .product-checkbox input {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--accent);
+        }
+        
+        .product-checkbox label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .divider-or {
+            text-align: center;
+            position: relative;
+            margin: 16px 0;
+        }
+        
+        .divider-or::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        .divider-or span {
+            background: var(--bg-card);
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Generate Button */
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+        
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+        }
+        
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Content Area */
+        .content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+            flex-shrink: 0;
+        }
+        
+        .content-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+        
+        .action-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .action-btn.success {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        /* Content Body */
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-text {
+            font-size: 14px;
+            max-width: 300px;
+        }
+        
+        /* Loading */
+        .loading-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 20px;
+        }
+        
+        .loading-state.visible {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .loading-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        /* Output Container */
+        .output-container {
+            display: none;
+        }
+        
+        .output-container.visible {
+            display: block;
+        }
+        
+        /* Meta Cards */
+        .meta-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .meta-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .meta-card-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .meta-card-value {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        /* Content Output */
+        .content-output {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+        }
+        
+        .content-output h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+            line-height: 1.3;
+        }
+        
+        .content-output h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 32px 0 16px;
+            color: var(--accent-light);
+            line-height: 1.3;
+        }
+        
+        .content-output h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            color: var(--text);
+        }
+        
+        .content-output p {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        
+        .content-output ul, .content-output ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        .content-output li {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .content-output strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        .content-output a {
+            color: var(--accent-light);
+            text-decoration: none;
+        }
+        
+        .content-output a:hover {
+            text-decoration: underline;
+        }
+        
+        .content-output hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+        
+        .content-output code {
+            background: var(--bg-elevated);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+        }
+        
+        .content-output pre {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .content-output pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        /* Raw Mode */
+        .raw-content {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text-secondary);
+        }
+        
+        .raw-content.visible {
+            display: block;
+        }
+        
+        .raw-content .visible + .content-output {
+            display: none;
+        }
+        
+        /* Editable Content Wrapper */
+        .editable-wrapper {
+            margin-bottom: 20px;
+        }
+        
+        .editable-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+        
+        .editable-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .editable-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .editable-content {
+            cursor: text;
+            transition: all 0.2s;
+            min-height: 300px;
+        }
+        
+        .editable-content:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        
+        .editable-content:hover:not(:focus) {
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+        
+        /* Iteration Chat Section */
+        .iterate-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .iterate-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-light);
+            margin-bottom: 14px;
+        }
+        
+        .iterate-header i {
+            font-size: 16px;
+        }
+        
+        .iterate-input-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .iterate-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        
+        .iterate-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .iterate-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .iterate-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .iterate-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        
+        .iterate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .iterate-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        .iterate-history {
+            margin-top: 14px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .iterate-history-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .iterate-history-item i {
+            color: var(--success);
+            margin-top: 2px;
+        }
+        
+        .iterate-history-item span {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        
+        .iterate-history-item .time {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+        
+        /* Tabs */
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-elevated);
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .view-tab {
+            padding: 6px 14px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .view-tab:hover {
+            color: var(--text);
+        }
+        
+        .view-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        /* Hidden */
+        #csvFile { display: none; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        
+        /* Clickable SERP Card */
+        .meta-card-clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .meta-card-clickable:hover {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .click-hint {
+            font-size: 9px;
+            color: var(--accent-light);
+            margin-left: 6px;
+            opacity: 0.7;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.visible {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-header h2 i {
+            color: var(--accent);
+        }
+        
+        .modal-close {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        
+        .modal-close:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        
+        /* SERP Result Item */
+        .serp-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.15s;
+        }
+        
+        .serp-item:hover {
+            border-color: var(--accent);
+        }
+        
+        .serp-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .serp-position {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            margin-right: 12px;
+        }
+        
+        .serp-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .serp-title-text {
+            flex: 1;
+        }
+        
+        .serp-url {
+            font-size: 12px;
+            color: var(--success);
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        
+        .serp-url a {
+            color: var(--success);
+            text-decoration: none;
+        }
+        
+        .serp-url a:hover {
+            text-decoration: underline;
+        }
+        
+        .serp-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .no-serp-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        
+        .no-serp-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Magnifying glass (SEO search) -->
+                    <circle cx="10" cy="10" r="6" stroke="white" stroke-width="2" fill="none"/>
+                    <line x1="14.5" y1="14.5" x2="19" y2="19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Rising arrow inside (growth/optimization) -->
+                    <path d="M7 12L9 9L11 11L13 7" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M11 7H13V9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span>SEO Content Agent | E-Commerce Category</span>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>Online</span>
+        </div>
+    </header>
+    
+    <main class="main">
+        <aside class="sidebar">
+            <!-- Step 1: Upload -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-file-csv"></i>
+                        Import CSV
+                    </div>
+                    <span class="step-badge">1</span>
+                </div>
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="csvFile" accept=".csv">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Clicca o trascina un file CSV</div>
+                    <div class="file-info" id="fileInfo">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="fileName"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Select Keywords -->
+            <div class="section" id="keywordsSection" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-key"></i>
+                        Keyword per SERP
+                        <span class="selected-count" id="selectedCount">0</span>
+                    </div>
+                    <span class="step-badge">2</span>
+                </div>
+                <div class="select-actions">
+                    <button class="select-btn" id="selectAll"><i class="fas fa-check-double"></i> Tutte</button>
+                    <button class="select-btn" id="selectNone"><i class="fas fa-times"></i> Nessuna</button>
+                </div>
+                <div class="keywords-container" id="keywordsList"></div>
+                <div class="serp-info">
+                    <i class="fas fa-search"></i>
+                    <span>Le keyword selezionate verranno analizzate su Google</span>
+                </div>
+            </div>
+            
+            <!-- Step 3: Configuration -->
+            <div class="section" id="configSection" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i>
+                        Configurazione
+                    </div>
+                    <span class="step-badge">3</span>
+                </div>
+                <form id="generateForm">
+                    <div class="form-group">
+                        <label class="form-label">Categoria Target *</label>
+                        <input type="text" class="form-input" name="keyword" id="mainKeyword" required>
+                    </div>
+                    
+                    <!-- Product Scraping Section -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Prodotti del tuo sito
+                            <span class="label-hint">(scraping automatico o manuale)</span>
+                        </label>
+                        
+                        <div class="scrape-section">
+                            <div class="scrape-input-row">
+                                <input type="text" class="form-input" id="scrapeUrl" placeholder="https://tuosito.it/categoria/...">
+                                <button type="button" class="btn-scrape" id="scrapeBtn">
+                                    <i class="fas fa-download"></i>
+                                    Scrape
+                                </button>
+                            </div>
+                            <div class="form-hint">Inserisci URL pagina categoria per estrarre automaticamente i prodotti</div>
+                        </div>
+                        
+                        <div id="scrapedProductsSection" style="display: none;">
+                            <div class="scraped-header">
+                                <span class="scraped-title">
+                                    <i class="fas fa-box"></i>
+                                    Prodotti trovati: <span id="scrapedCount">0</span>
+                                </span>
+                                <span class="cms-badge" id="cmsBadge">CMS</span>
+                            </div>
+                            <div class="products-select-actions">
+                                <button type="button" class="select-btn" id="selectAllProducts">
+                                    <i class="fas fa-check-double"></i> Tutti
+                                </button>
+                                <button type="button" class="select-btn" id="selectNoneProducts">
+                                    <i class="fas fa-times"></i> Nessuno
+                                </button>
+                            </div>
+                            <div class="products-container" id="productsList"></div>
+                        </div>
+                        
+                        <div class="divider-or">
+                            <span>oppure inserisci manualmente</span>
+                        </div>
+                        
+                        <textarea class="form-textarea" name="site_products" id="siteProductsTextarea" placeholder="Costume intero sportivo&#10;Bikini mare&#10;Costume da gara..."></textarea>
+                        <div class="form-hint">Inserisci un prodotto per riga</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">URL Categoria Padre</label>
+                            <input type="text" class="form-input" name="parent_url" placeholder="/costumi/">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nome Categoria Padre</label>
+                            <input type="text" class="form-input" name="parent_name" placeholder="Costumi">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-generate" id="generateBtn">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        Genera Contenuto SEO
+                    </button>
+                </form>
+            </div>
+        </aside>
+        
+        <div class="content">
+            <div class="content-header">
+                <h1 class="content-title">Contenuto Generato</h1>
+                <div class="header-actions" id="headerActions" style="display: none;">
+                    <div class="view-tabs">
+                        <button class="view-tab active" id="tabFormatted">Formattato</button>
+                        <button class="view-tab" id="tabRaw">Raw</button>
+                    </div>
+                    <button class="action-btn" id="copyBtn">
+                        <i class="fas fa-copy"></i>
+                        Copia
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-body">
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon"><i class="fas fa-file-lines"></i></div>
+                    <div class="empty-title">Nessun contenuto</div>
+                    <div class="empty-text">Carica un CSV, seleziona le keyword da analizzare e genera il tuo contenuto SEO ottimizzato</div>
+                </div>
+                
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Generazione contenuto SEO...</div>
+                    <div class="loading-sub" id="loadingSub">Analisi SERP in corso</div>
+                </div>
+                
+                <!-- Output -->
+                <div class="output-container" id="outputContainer">
+                    <div class="meta-cards">
+                        <div class="meta-card">
+                            <div class="meta-card-label"><i class="fas fa-heading"></i> Meta Title</div>
+                            <div class="meta-card-value" id="metaTitle">-</div>
+                        </div>
+                        <div class="meta-card">
+                            <div class="meta-card-label"><i class="fas fa-align-left"></i> Meta Description</div>
+                            <div class="meta-card-value" id="metaDesc">-</div>
+                        </div>
+                        <div class="meta-card meta-card-clickable" id="serpCard">
+                            <div class="meta-card-label"><i class="fas fa-search"></i> SERP Analizzate <span class="click-hint">clicca per dettagli</span></div>
+                            <div class="meta-card-value" id="serpCount">0 risultati</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Editable Content Area -->
+                    <div class="editable-wrapper">
+                        <div class="editable-header">
+                            <span class="editable-label"><i class="fas fa-edit"></i> Contenuto Editabile</span>
+                            <span class="editable-hint">Clicca per modificare direttamente</span>
+                        </div>
+                        <div class="content-output editable-content" id="contentFormatted" contenteditable="true"></div>
+                    </div>
+                    <div class="raw-content" id="contentRaw"></div>
+                    
+                    <!-- Iteration Chat -->
+                    <div class="iterate-section" id="iterateSection">
+                        <div class="iterate-header">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span>Itera sul contenuto</span>
+                        </div>
+                        <div class="iterate-input-row">
+                            <input type="text" class="iterate-input" id="iterateInput" placeholder="Es: Rendi il tono più formale, aggiungi un paragrafo sui materiali...">
+                            <button class="iterate-btn" id="iterateBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                Applica
+                            </button>
+                        </div>
+                        <div class="iterate-history" id="iterateHistory"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- SERP Modal -->
+    <div class="modal-overlay" id="serpModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-search"></i> Risultati SERP Analizzati</h2>
+                <button class="modal-close" id="closeModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="serpModalBody">
+                <!-- SERP results will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // State
+        let keywords = [];
+        let selectedKeywords = new Set();
+        let rawContent = '';
+        let serpResults = [];
+        
+        // Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const csvFile = document.getElementById('csvFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const keywordsSection = document.getElementById('keywordsSection');
+        const keywordsList = document.getElementById('keywordsList');
+        const selectedCount = document.getElementById('selectedCount');
+        const configSection = document.getElementById('configSection');
+        const mainKeyword = document.getElementById('mainKeyword');
+        const generateForm = document.getElementById('generateForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const emptyState = document.getElementById('emptyState');
+        const loadingState = document.getElementById('loadingState');
+        const loadingSub = document.getElementById('loadingSub');
+        const outputContainer = document.getElementById('outputContainer');
+        const headerActions = document.getElementById('headerActions');
+        const contentFormatted = document.getElementById('contentFormatted');
+        const contentRaw = document.getElementById('contentRaw');
+        const metaTitle = document.getElementById('metaTitle');
+        const metaDesc = document.getElementById('metaDesc');
+        const serpCount = document.getElementById('serpCount');
+        const copyBtn = document.getElementById('copyBtn');
+        const tabFormatted = document.getElementById('tabFormatted');
+        const tabRaw = document.getElementById('tabRaw');
+        
+        // Upload handlers
+        uploadZone.addEventListener('click', () => csvFile.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = 'var(--accent)';
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '';
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '';
+            if (e.dataTransfer.files[0]) {
+                csvFile.files = e.dataTransfer.files;
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        csvFile.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+        });
+        
+        async function handleFileUpload(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const res = await fetch('/api/upload-csv', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.success) {
+                    uploadZone.classList.add('active');
+                    fileName.textContent = `${file.name} (${data.analysis.total_keywords} keyword)`;
+                    
+                    // Store keywords and render
+                    keywords = data.analysis.top_keywords;
+                    renderKeywords();
+                    
+                    // Set main keyword
+                    mainKeyword.value = data.analysis.main_keyword;
+                    
+                    // Show sections
+                    keywordsSection.style.display = 'block';
+                    configSection.style.display = 'block';
+                }
+            } catch (err) {
+                alert('Errore nel caricamento: ' + err.message);
+            }
+        }
+        
+        function renderKeywords() {
+            keywordsList.innerHTML = keywords.map((kw, i) => `
+                <div class="keyword-item ${selectedKeywords.has(i) ? 'selected' : ''}" data-index="${i}">
+                    <div class="keyword-checkbox"><i class="fas fa-check"></i></div>
+                    <div class="keyword-info">
+                        <div class="keyword-text">${kw.keyword}</div>
+                        <div class="keyword-meta">KD: ${kw.difficulty || '-'}</div>
+                    </div>
+                    <div class="keyword-volume">${formatVolume(kw.volume)}</div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            document.querySelectorAll('.keyword-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const idx = parseInt(item.dataset.index);
+                    if (selectedKeywords.has(idx)) {
+                        selectedKeywords.delete(idx);
+                        item.classList.remove('selected');
+                    } else {
+                        selectedKeywords.add(idx);
+                        item.classList.add('selected');
+                    }
+                    updateSelectedCount();
+                });
+            });
+            
+            updateSelectedCount();
+        }
+        
+        function formatVolume(vol) {
+            if (!vol) return '-';
+            if (vol >= 1000) return (vol / 1000).toFixed(1) + 'K';
+            return vol.toString();
+        }
+        
+        function updateSelectedCount() {
+            selectedCount.textContent = selectedKeywords.size;
+        }
+        
+        // Select all/none
+        document.getElementById('selectAll').addEventListener('click', () => {
+            keywords.forEach((_, i) => selectedKeywords.add(i));
+            renderKeywords();
+        });
+        
+        document.getElementById('selectNone').addEventListener('click', () => {
+            selectedKeywords.clear();
+            renderKeywords();
+        });
+        
+        // === Product Scraping ===
+        const scrapeBtn = document.getElementById('scrapeBtn');
+        const scrapeUrl = document.getElementById('scrapeUrl');
+        const scrapedProductsSection = document.getElementById('scrapedProductsSection');
+        const productsList = document.getElementById('productsList');
+        const scrapedCount = document.getElementById('scrapedCount');
+        const cmsBadge = document.getElementById('cmsBadge');
+        const siteProductsTextarea = document.getElementById('siteProductsTextarea');
+        
+        let scrapedProducts = [];
+        let selectedProducts = new Set();
+        
+        scrapeBtn.addEventListener('click', async () => {
+            const url = scrapeUrl.value.trim();
+            if (!url) {
+                alert('Inserisci un URL valido');
+                return;
+            }
+            
+            // Show loading
+            scrapeBtn.disabled = true;
+            scrapeBtn.classList.add('loading');
+            scrapeBtn.innerHTML = '<i class="fas fa-spinner"></i> Scraping...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('url', url);
+                
+                const res = await fetch('/api/scrape-products', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.success && data.products.length > 0) {
+                    scrapedProducts = data.products;
+                    selectedProducts = new Set(scrapedProducts.map((_, i) => i));
+                    
+                    scrapedCount.textContent = data.total_found;
+                    cmsBadge.textContent = data.cms_detected.toUpperCase();
+                    
+                    renderProducts();
+                    scrapedProductsSection.style.display = 'block';
+                    
+                    // Clear manual textarea since we have scraped products
+                    siteProductsTextarea.value = '';
+                } else {
+                    alert('Nessun prodotto trovato. Verifica che l\'URL sia una pagina categoria.');
+                }
+            } catch (err) {
+                alert('Errore durante lo scraping: ' + err.message);
+            } finally {
+                scrapeBtn.disabled = false;
+                scrapeBtn.classList.remove('loading');
+                scrapeBtn.innerHTML = '<i class="fas fa-download"></i> Scrape';
+            }
+        });
+        
+        function renderProducts() {
+            productsList.innerHTML = scrapedProducts.map((product, i) => `
+                <div class="product-checkbox">
+                    <input type="checkbox" id="product_${i}" ${selectedProducts.has(i) ? 'checked' : ''}>
+                    <label for="product_${i}" title="${product}">${product}</label>
+                </div>
+            `).join('');
+            
+            // Add event listeners
+            productsList.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) {
+                        selectedProducts.add(i);
+                    } else {
+                        selectedProducts.delete(i);
+                    }
+                    updateProductsInTextarea();
+                });
+            });
+            
+            updateProductsInTextarea();
+        }
+        
+        function updateProductsInTextarea() {
+            // Put selected products in the hidden textarea for form submission
+            const selected = Array.from(selectedProducts).map(i => scrapedProducts[i]);
+            siteProductsTextarea.value = selected.join('\n');
+        }
+        
+        // Select all/none products
+        document.getElementById('selectAllProducts').addEventListener('click', () => {
+            scrapedProducts.forEach((_, i) => selectedProducts.add(i));
+            renderProducts();
+        });
+        
+        document.getElementById('selectNoneProducts').addEventListener('click', () => {
+            selectedProducts.clear();
+            renderProducts();
+        });
+        
+        // Tab switching
+        tabFormatted.addEventListener('click', () => {
+            tabFormatted.classList.add('active');
+            tabRaw.classList.remove('active');
+            contentFormatted.style.display = 'block';
+            contentRaw.classList.remove('visible');
+        });
+        
+        tabRaw.addEventListener('click', () => {
+            tabRaw.classList.add('active');
+            tabFormatted.classList.remove('active');
+            contentFormatted.style.display = 'none';
+            contentRaw.classList.add('visible');
+        });
+        
+        // Generate
+        generateForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get selected keyword texts
+            const selectedKws = Array.from(selectedKeywords).map(i => keywords[i].keyword);
+            
+            const formData = new FormData(generateForm);
+            formData.append('selected_keywords', JSON.stringify(selectedKws));
+            
+            // Show loading
+            emptyState.style.display = 'none';
+            outputContainer.classList.remove('visible');
+            headerActions.style.display = 'none';
+            loadingState.classList.add('visible');
+            generateBtn.disabled = true;
+            
+            // Update loading text
+            if (selectedKws.length > 0) {
+                loadingSub.textContent = `Analizzando ${selectedKws.length} keyword su SERP...`;
+            } else {
+                loadingSub.textContent = 'Generazione in corso...';
+            }
+            
+            try {
+                const res = await fetch('/api/generate', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                loadingState.classList.remove('visible');
+                generateBtn.disabled = false;
+                
+                if (data.success) {
+                    // Store raw content
+                    rawContent = data.content;
+                    
+                    // Store SERP results
+                    serpResults = data.serp_results || [];
+                    
+                    // Update meta cards
+                    metaTitle.textContent = data.meta_title || '-';
+                    metaDesc.textContent = data.meta_description || '-';
+                    serpCount.textContent = `${data.serp_analyzed || 0} risultati`;
+                    
+                    // Clean and render content
+                    let cleanContent = data.content;
+                    
+                    // Remove markdown code blocks if present
+                    cleanContent = cleanContent.replace(/^```\s*$/gm, '');
+                    cleanContent = cleanContent.replace(/^```markdown\s*$/gm, '');
+                    
+                    // Remove META DATA section from rendered output (already shown in cards)
+                    cleanContent = cleanContent.replace(/<!--\s*META DATA\s*-->[\s\S]*?---/i, '');
+                    
+                    contentFormatted.innerHTML = marked.parse(cleanContent);
+                    contentRaw.textContent = data.content;
+                    
+                    // Show output
+                    outputContainer.classList.add('visible');
+                    headerActions.style.display = 'flex';
+                    
+                    // Reset to formatted tab
+                    tabFormatted.classList.add('active');
+                    tabRaw.classList.remove('active');
+                    contentFormatted.style.display = 'block';
+                    contentRaw.classList.remove('visible');
+                } else {
+                    alert('Errore: ' + (data.detail || 'Generazione fallita'));
+                    emptyState.style.display = 'flex';
+                }
+            } catch (err) {
+                loadingState.classList.remove('visible');
+                generateBtn.disabled = false;
+                emptyState.style.display = 'flex';
+                alert('Errore: ' + err.message);
+            }
+        });
+        
+        // Copy
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(rawContent).then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiato!';
+                copyBtn.classList.add('success');
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copia';
+                    copyBtn.classList.remove('success');
+                }, 2000);
+            });
+        });
+        
+        // SERP Modal
+        const serpCard = document.getElementById('serpCard');
+        const serpModal = document.getElementById('serpModal');
+        const serpModalBody = document.getElementById('serpModalBody');
+        const closeModal = document.getElementById('closeModal');
+        
+        serpCard.addEventListener('click', () => {
+            if (serpResults.length === 0) {
+                serpModalBody.innerHTML = `
+                    <div class="no-serp-results">
+                        <i class="fas fa-search"></i>
+                        <p>Nessun risultato SERP disponibile</p>
+                    </div>
+                `;
+            } else {
+                serpModalBody.innerHTML = serpResults.map((r, i) => `
+                    <div class="serp-item">
+                        <div class="serp-title">
+                            <span class="serp-position">${i + 1}</span>
+                            <span class="serp-title-text">${r.title || 'Senza titolo'}</span>
+                        </div>
+                        <div class="serp-url">
+                            <a href="${r.url}" target="_blank" rel="noopener">${r.url}</a>
+                        </div>
+                        <div class="serp-desc">${r.description || 'Nessuna descrizione disponibile'}</div>
+                    </div>
+                `).join('');
+            }
+            serpModal.classList.add('visible');
+        });
+        
+        closeModal.addEventListener('click', () => {
+            serpModal.classList.remove('visible');
+        });
+        
+        serpModal.addEventListener('click', (e) => {
+            if (e.target === serpModal) {
+                serpModal.classList.remove('visible');
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && serpModal.classList.contains('visible')) {
+                serpModal.classList.remove('visible');
+            }
+        });
+        
+        // === ITERATION FUNCTIONALITY ===
+        const iterateInput = document.getElementById('iterateInput');
+        const iterateBtn = document.getElementById('iterateBtn');
+        const iterateHistory = document.getElementById('iterateHistory');
+        
+        // Track iteration history
+        let iterationCount = 0;
+        
+        // Get current content from editable div (as markdown)
+        function getCurrentContent() {
+            // If we have raw content, use that as base
+            // But check if user made edits in the formatted view
+            return rawContent;
+        }
+        
+        // Handle iteration
+        iterateBtn.addEventListener('click', async () => {
+            const instruction = iterateInput.value.trim();
+            if (!instruction) {
+                alert('Inserisci un\'istruzione per modificare il contenuto');
+                return;
+            }
+            
+            // Get current content
+            const currentContent = rawContent;
+            if (!currentContent) {
+                alert('Nessun contenuto da modificare. Genera prima il contenuto.');
+                return;
+            }
+            
+            // Show loading
+            iterateBtn.disabled = true;
+            iterateBtn.classList.add('loading');
+            iterateBtn.innerHTML = '<i class="fas fa-spinner"></i> Elaborazione...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('current_content', currentContent);
+                formData.append('instruction', instruction);
+                
+                const res = await fetch('/api/iterate', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update raw content
+                    rawContent = data.content;
+                    
+                    // Clean and render content
+                    let cleanContent = data.content;
+                    cleanContent = cleanContent.replace(/^```\s*$/gm, '');
+                    cleanContent = cleanContent.replace(/^```markdown\s*$/gm, '');
+                    cleanContent = cleanContent.replace(/<!--\s*META DATA\s*-->[\s\S]*?---/i, '');
+                    
+                    contentFormatted.innerHTML = marked.parse(cleanContent);
+                    contentRaw.textContent = data.content;
+                    
+                    // Update meta if present
+                    const titleMatch = data.content.match(/\*\*Meta Title:\*\*\s*(.+)/i);
+                    const descMatch = data.content.match(/\*\*Meta Description:\*\*\s*(.+)/i);
+                    if (titleMatch) metaTitle.textContent = titleMatch[1].trim();
+                    if (descMatch) metaDesc.textContent = descMatch[1].trim();
+                    
+                    // Add to history
+                    iterationCount++;
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'iterate-history-item';
+                    historyItem.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span>${instruction}</span>
+                        <span class="time">${timeStr}</span>
+                    `;
+                    iterateHistory.insertBefore(historyItem, iterateHistory.firstChild);
+                    
+                    // Clear input
+                    iterateInput.value = '';
+                    
+                    // Flash success
+                    contentFormatted.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.3)';
+                    setTimeout(() => {
+                        contentFormatted.style.boxShadow = '';
+                    }, 1000);
+                    
+                } else {
+                    alert('Errore: ' + (data.detail || 'Iterazione fallita'));
+                }
+            } catch (err) {
+                alert('Errore: ' + err.message);
+            } finally {
+                iterateBtn.disabled = false;
+                iterateBtn.classList.remove('loading');
+                iterateBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Applica';
+            }
+        });
+        
+        // Allow Enter key to submit iteration
+        iterateInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                iterateBtn.click();
+            }
+        });
+        
+        // Track edits in contenteditable
+        contentFormatted.addEventListener('input', () => {
+            // When user edits the formatted content, we need to sync to raw
+            // For now, we'll just mark that edits were made
+            // In a full implementation, we'd convert HTML back to markdown
+        });
+    </script>
+</body>
+</html>
